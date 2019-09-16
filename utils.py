@@ -29,11 +29,20 @@ def write(fpath, text):
     with open(fpath, 'a+') as f:
         f.write(text + '\n')
 
+def get_folds(num_folds):
+    val = np.arange(num_folds)
+    test = []
+    while len(test) < len(val):
+        fold = np.random.choice(num_folds)
+        if fold not in test and fold != val[len(test)]:
+            test.append(fold)
+    return val, test
+
 def run_cmd(config):
     os.makedirs('scripts', exist_ok=True)
     fpaths = os.listdir('scripts')
     num_scripts = len([fpath for fpath in fpaths if '.sh' in fpath])
-    script_fpath = f'robust_{num_scripts}.sh'
+    script_fpath = f'mldg_{num_scripts}.sh'
     copyfile('template.sh', 'scripts/' + script_fpath)
     with open('scripts/' + script_fpath, 'a') as f:
         f.write('\npython {}'.format(config['cmd']))
