@@ -122,3 +122,4 @@ class MLDGTrainer(MLPTrainer):
                 is_early_stop = self.val()
                 if is_early_stop:
                     break
+        return self.best_val_score
