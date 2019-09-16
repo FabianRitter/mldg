@@ -31,11 +31,12 @@ def write(fpath, text):
 
 def get_folds(num_folds):
     val = np.arange(num_folds)
-    test = []
-    while len(test) < len(val):
-        fold = np.random.choice(num_folds)
-        if fold not in test and fold != val[len(test)]:
-            test.append(fold)
+    while True:
+        test = np.random.permutation(num_folds)
+        if (val == test).any():
+            continue
+        else:
+            break
     return val, test
 
 def run_cmd(config):
