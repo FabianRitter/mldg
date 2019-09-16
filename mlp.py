@@ -1,10 +1,7 @@
-import math
-
 import torch.nn as nn
 import torch.nn.functional as F
 
 from ops import linear
-
 
 class MLP(nn.Module):
     def __init__(self, config):

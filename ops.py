@@ -2,7 +2,6 @@ import torch.autograd as autograd
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-
 def linear(inputs, weight, bias, meta_step_size, meta_loss=None, stop_gradient=False):
     if meta_loss is not None:
 

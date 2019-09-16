@@ -1,6 +1,4 @@
 import argparse
-import numpy as np
-import os
 
 from train import MLPTrainer
 from utils import *
@@ -31,6 +29,7 @@ def main(config):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--num_folds', type=int, default=7)
     parser.add_argument('--num_itrs', type=int, default=45000)
     parser.add_argument('--num_val_itrs', type=int, default=1000)
