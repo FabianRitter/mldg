@@ -1,55 +1,48 @@
 import argparse
+import os
 
-from model import ModelMLDG
+from train import MLDGTrainer
+from utils import *
 
+def main(config):
+    val_loss, test_loss = [], []
+    val_folds = np.arange(config['num_folds'])
+    test_folds = np.roll(val_folds, 1)
+    for val_fold, test_fold in zip(val_folds, test_folds):
+        config['val_fold'] = val_fold
+        config['test_fold'] = test_fold
+        trainer = MLDGTrainer(config)
+        val_loss.append(trainer.train())
+        test_loss.append(trainer.test())
+        print(val_loss)
+        print(test_loss)
+    dpath = 'results/mldg_{}_{}_{}_{}'.format(
+        config['wd'],
+        config['dropout'],
+        config['meta_step_size'],
+        config['sd'])
+    if not os.path.exists(dpath):
+        os.makedirs(dpath)
+    val_str = f'val {np.mean(val_loss):.6f} +- {np.std(val_loss):.6f}'
+    test_str = f'test {np.mean(test_loss):.6f} +- {np.std(test_loss):.6f}'
+    print(val_str)
+    print(test_str)
+    write(os.path.join(dpath, 'results.txt'), val_str)
+    write(os.path.join(dpath, 'results.txt'), test_str)
 
-def main():
-    main_arg_parser = argparse.ArgumentParser(description="parser")
-    subparsers = main_arg_parser.add_subparsers(title="subcommands", dest="subcommand")
-
-    train_arg_parser = subparsers.add_parser("train", help="parser for training arguments")
-    train_arg_parser.add_argument("--test_every", type=int, default=50,
-                                  help="number of test every steps")
-    train_arg_parser.add_argument("--batch_size", type=int, default=128,
-                                  help="batch size for training, default is 64")
-    train_arg_parser.add_argument("--num_classes", type=int, default=10,
-                                  help="number of classes")
-    train_arg_parser.add_argument("--step_size", type=int, default=1,
-                                  help="number of classes")
-    train_arg_parser.add_argument("--inner_loops", type=int, default=200000,
-                                  help="number of classes")
-    train_arg_parser.add_argument("--unseen_index", type=int, default=0,
-                                  help="index of unseen domain")
-    train_arg_parser.add_argument("--lr", type=float, default=0.0001,
-                                  help='learning rate of the model')
-    train_arg_parser.add_argument("--meta_step_size", type=float, default=0.0001,
-                                  help='meta step size')
-    train_arg_parser.add_argument("--meta_val_beta", type=float, default=0.0001,
-                                  help='the strength of the meta val loss')
-    train_arg_parser.add_argument("--weight_decay", type=float, default=0.00005,
-                                  help='weight decay')
-    train_arg_parser.add_argument("--momentum", type=float, default=0.9,
-                                  help='momentum')
-    train_arg_parser.add_argument("--logs", type=str, default='logs/',
-                                  help='logs folder to write log')
-    train_arg_parser.add_argument("--model_path", type=str, default='',
-                                  help='folder for saving model')
-    train_arg_parser.add_argument("--state_dict", type=str, default='',
-                                  help='model of pre trained')
-    train_arg_parser.add_argument("--data_root", type=str, default='',
-                                  help='folder root of the data')
-    train_arg_parser.add_argument("--stop_gradient", type=bool, default=False,
-                                  help='whether stop gradient of the first order gradient')
-    train_arg_parser.add_argument("--debug", type=bool, default=False,
-                                  help='whether for debug mode or not')
-    args = main_arg_parser.parse_args()
-
-    model_obj = ModelMLDG(flags=args)
-    model_obj.train(flags=args)
-
-    # after training, we should test the held out domain
-    model_obj.heldout_test(flags=args)
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--num_folds', type=int, default=5)
+    parser.add_argument('--test_fold', type=int, default=0)
+    parser.add_argument('--num_itrs', type=int, default=45000)
+    parser.add_argument('--num_val_itrs', type=int, default=1000)
+    parser.add_argument('--num_early_stop_itrs', type=int, default=10000)
+    parser.add_argument('--batch_size', type=int, default=100)
+    parser.add_argument('--lr', type=float, default=1e-5)
+    parser.add_argument('--meta_lr', type=float, default=1e-5)
+    parser.add_argument('--meta_loss_mult', type=float, default=1)
+    parser.add_argument('--wd', type=float, default=0.01)
+    parser.add_argument('--dropout', type=float, default=0.5)
+    parser.add_argument('--stop_gradient', type=bool, default=False)
+    config = vars(parser.parse_args())
+    main(config)

@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 
 
-def linear(inputs, weight, bias, meta_step_size=0.001, meta_loss=None, stop_gradient=False):
+def linear(inputs, weight, bias, meta_step_size, meta_loss=None, stop_gradient=False):
     if meta_loss is not None:
 
         if not stop_gradient:
@@ -31,7 +31,7 @@ def linear(inputs, weight, bias, meta_step_size=0.001, meta_loss=None, stop_grad
         return F.linear(inputs, weight, bias)
 
 
-def conv2d(inputs, weight, bias, meta_step_size=0.001, stride=1, padding=0, dilation=1, groups=1, meta_loss=None,
+def conv2d(inputs, weight, bias, meta_step_size, stride=1, padding=0, dilation=1, groups=1, meta_loss=None,
            stop_gradient=False):
     if meta_loss is not None:
 
