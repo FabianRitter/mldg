@@ -16,11 +16,12 @@ def main(config):
         test_loss.append(trainer.test())
         print(val_loss)
         print(test_loss)
-    dpath = 'results/mldg_{}_{}_{}_{}'.format(
+    dpath = 'results/mldg_{}_{}_{}_{}_{}'.format(
         config['wd'],
         config['dropout'],
-        config['meta_step_size'],
-        config['sd'])
+        config['lr'],
+        config['meta_lr'],
+        config['meta_loss_mult'])
     if not os.path.exists(dpath):
         os.makedirs(dpath)
     val_str = f'val {np.mean(val_loss):.6f} +- {np.std(val_loss):.6f}'
