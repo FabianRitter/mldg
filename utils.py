@@ -45,7 +45,7 @@ if __name__ == '__main__':
     parser.add_argument('--cmd', type=str, default=None)
     config = parser.parse_args()
     config = vars(config)
-    if '--cmd' in config:
+    if 'cmd' in config:
         run_cmd(config)
     else:
         summary()
