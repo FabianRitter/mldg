@@ -15,8 +15,6 @@ def main(config):
         trainer = MLPTrainer(config)
         val_loss.append(trainer.train())
         test_loss.append(trainer.test())
-        print(val_loss)
-        print(test_loss)
     dpath = 'results/mlp_{}_{}_{}_{}'.format(
         config['wd'],
         config['dropout'],

@@ -14,8 +14,6 @@ def main(config):
         trainer = MLDGTrainer(config)
         val_loss.append(trainer.train())
         test_loss.append(trainer.test())
-        print(val_loss)
-        print(test_loss)
     dpath = 'results/mldg_{}_{}_{}_{}_{}'.format(
         config['wd'],
         config['dropout'],
