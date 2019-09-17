@@ -43,7 +43,7 @@ class MLPTrainer:
         self.net.train()
         for itr in range(self.config['num_itrs']):
             self.itr = itr
-            fold = np.random.choice(self.config['num_folds'])
+            fold = np.random.choice(len(self.data_train))
             x, y = self.data_train[fold].get_batch()
             if np.random.random() < self.config['p']:
                 sd = np.random.uniform(0, self.config['sd'])
@@ -96,7 +96,7 @@ class MLDGTrainer(MLPTrainer):
         self.net.train()
         for itr in range(self.config['num_itrs']):
             self.itr = itr
-            support_fold, query_fold = np.random.choice(self.config['num_folds'], 2, replace=False)
+            support_fold, query_fold = np.random.choice(len(self.data_train), 2, replace=False)
             data_support, data_query = self.data_train[support_fold], self.data_train[query_fold]
             x_support, y_support = data_support.get_batch()
             support_loss = F.mse_loss(self.net(x_support), y_support)
