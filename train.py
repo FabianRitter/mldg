@@ -43,14 +43,13 @@ class MLPTrainer:
         self.net.train()
         for itr in range(self.config['num_itrs']):
             self.itr = itr
-            loss = 0
-            for train_fold in range(len(self.data_train)):
-                x, y = self.data_train[train_fold].get_batch()
-                if np.random.random() < self.config['p']:
-                    sd = np.random.uniform(0, self.config['sd'])
-                    noise = torch.zeros_like(x).data.normal_(0, sd)
-                    x = x + noise
-                loss += F.mse_loss(self.net(x), y, reduction='none')
+            fold = np.random.choice(self.config['num_folds'])
+            x, y = self.data_train[fold].get_batch()
+            if np.random.random() < self.config['p']:
+                sd = np.random.uniform(0, self.config['sd'])
+                noise = torch.zeros_like(x).data.normal_(0, sd)
+                x = x + noise
+            loss = F.mse_loss(self.net(x), y, reduction='none')
             self.optimizer.zero_grad()
             loss.mean().backward()
             self.optimizer.step()
