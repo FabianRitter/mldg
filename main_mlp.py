@@ -5,12 +5,11 @@ from utils import *
 
 def main(config):
     set_seed(config['seed'])
-    dpath = 'results/mlp_{}_{}_{}_{}_{}/{}'.format(
+    dpath = 'results/mlp_{}_{}_{}_{}/{}'.format(
         config['lr'],
+        config['batch_size'],
         config['wd'],
         config['dropout'],
-        config['p'],
-        config['sd'],
         config['seed'])
     os.makedirs(dpath)
     val_folds, test_folds = get_folds(config['num_folds'])
@@ -36,7 +35,5 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--wd', type=float, default=0.01)
     parser.add_argument('--dropout', type=float, default=0.5)
-    parser.add_argument('--p', type=float, default=0)
-    parser.add_argument('--sd', type=float, default=0)
     config = vars(parser.parse_args())
     main(config)

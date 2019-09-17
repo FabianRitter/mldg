@@ -5,10 +5,11 @@ from utils import *
 
 def main(config):
     set_seed(config['seed'])
-    dpath = 'results/mldg_{}_{}_{}_{}_{}/{}'.format(
+    dpath = 'results/mldg_{}_{}_{}_{}_{}_{}/{}'.format(
         config['lr'],
         config['inner_lr'],
         config['query_loss_mult'],
+        config['batch_size'],
         config['wd'],
         config['dropout'],
         config['seed'])
