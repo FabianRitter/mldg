@@ -49,9 +49,9 @@ class MLPTrainer:
                 sd = np.random.uniform(0, self.config['sd'])
                 noise = torch.zeros_like(x).data.normal_(0, sd)
                 x = x + noise
-            loss = F.mse_loss(self.net(x), y, reduction='none')
+            loss = F.mse_loss(self.net(x), y)
             self.optimizer.zero_grad()
-            loss.mean().backward()
+            loss.backward()
             self.optimizer.step()
             if itr > 0 and itr % self.config['num_val_itrs'] == 0:
                 is_early_stop = self.val()
