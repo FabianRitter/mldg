@@ -1,6 +1,3 @@
-import os
-
-from argparse import ArgumentParser
 from sklearn.linear_model import Lasso
 from sklearn.metrics import r2_score
 from utils import *
@@ -31,24 +28,27 @@ def get_data(num_folds, val_fold, test_fold):
     x_test = np.nan_to_num(x_test)
     return x_train, y_train, x_val, y_val, x_test, y_test
 
-def main(args):
-    val_folds = np.arange(args.num_folds)
-    test_folds = np.roll(val_folds, 1)
-    val_losses, test_losses = [], []
+def main(config):
+    set_seed(config['seed'])
+    dpath = 'results/logreg_{}/{}'.format(
+        config['wd'],
+        config['seed'])
+    os.makedirs(dpath)
+    val_folds, test_folds = get_folds(config['num_folds'])
+    val_loss, test_loss = [], []
     for val_fold, test_fold in zip(val_folds, test_folds):
-        x_train, y_train, x_val, y_val, x_test, y_test = get_data(args.num_folds, val_fold, test_fold)
-        model = Lasso(alpha=args.wd).fit(x_train, y_train)
-        val_loss = r2_score(y_val, model.predict(x_val))
-        test_loss = r2_score(y_test, model.predict(x_test))
-        val_losses.append(val_loss)
-        test_losses.append(test_loss)
-        print('val {:.6f}, eval {:.6f}'.format(val_loss, test_loss))
-    print(f'val {np.mean(val_losses):.6f} +- {np.std(val_losses):.6f}')
-    print(f'eval {np.mean(test_losses):.6f} +- {np.std(test_losses):.6f}')
+        x_train, y_train, x_val, y_val, x_test, y_test = get_data(config['num_folds'], val_fold, test_fold)
+        model = Lasso(alpha=config['wd']).fit(x_train, y_train)
+        val_loss.append(r2_score(y_val, model.predict(x_val)))
+        test_loss.append(r2_score(y_test, model.predict(x_test)))
+    results = f'{np.mean(val_loss):.6f},{np.mean(test_loss):.6f}'
+    write(os.path.join(dpath, 'results.txt'), results)
+    print(results)
 
 if __name__ == '__main__':
     parser = ArgumentParser()
+    parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--num_folds', type=int, default=7)
-    parser.add_argument('--wd', type=float, default=5e-4)
-    args = parser.parse_args()
-    main(args)
+    parser.add_argument('--wd', type=float, default=0.01)
+    config = vars(parser.parse_args())
+    main(config)

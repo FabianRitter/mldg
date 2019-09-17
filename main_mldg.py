@@ -7,8 +7,8 @@ def main(config):
     set_seed(config['seed'])
     dpath = 'results/mldg_{}_{}_{}_{}_{}/{}'.format(
         config['lr'],
-        config['meta_lr'],
-        config['meta_loss_mult'],
+        config['inner_lr'],
+        config['query_loss_mult'],
         config['wd'],
         config['dropout'],
         config['seed'])
@@ -35,8 +35,8 @@ if __name__ == '__main__':
     parser.add_argument('--num_early_stop_itrs', type=int, default=10000)
     parser.add_argument('--batch_size', type=int, default=100)
     parser.add_argument('--lr', type=float, default=1e-4)
-    parser.add_argument('--meta_lr', type=float, default=1e-4)
-    parser.add_argument('--meta_loss_mult', type=float, default=0)
+    parser.add_argument('--inner_lr', type=float, default=1e-4)
+    parser.add_argument('--query_loss_mult', type=float, default=0)
     parser.add_argument('--wd', type=float, default=0.01)
     parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--stop_gradient', type=bool, default=False)

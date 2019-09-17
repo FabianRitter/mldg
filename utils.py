@@ -52,14 +52,17 @@ def run_cmd(config):
 
 def summary():
     df = {}
-    fpaths = os.listdir('results')
-    for fpath in fpaths:
-        with open(os.path.join('results', fpath, 'results.txt')) as f:
-            val, test = f.readlines()
-            val, test = float(val.split(' ')[1]), float(test.split(' ')[1])
-            df[fpath] = {'val': val, 'test': test}
+    dpaths = os.listdir('results')
+    for dpath in dpaths:
+        seeds = sorted(os.listdir(os.path.join('results', dpath)))
+        results = []
+        for seed in seeds:
+            results.append(np.loadtxt(os.path.join('results', dpath, seed, 'results.txt'), delimiter=','))
+        results = np.stack(results, axis=0)
+        df[dpath] = {'val': results.mean(0)[0], 'test': results.mean(0)[1]}
     df = pd.DataFrame(df).T
-    df.sort_values('val')
+    df.sort_values('val', ascending=False, inplace=True)
+    df.to_csv('results/summary.txt')
 
 if __name__ == '__main__':
     parser = ArgumentParser()

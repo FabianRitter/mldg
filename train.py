@@ -97,24 +97,26 @@ class MLDGTrainer(MLPTrainer):
         self.net.train()
         for itr in range(self.config['num_itrs']):
             self.itr = itr
-            val_fold = np.random.choice(a=np.arange(0, len(self.data_train)), size=1)[0]
-            data_val = self.data_train[val_fold]
-            meta_train_loss = 0
-            for index in range(len(self.data_train)):
-                if index == val_fold:
-                    continue
-                x, y = self.data_train[index].get_batch()
-                meta_train_loss += F.mse_loss(self.net(x), y)
-            x, y = data_val.get_batch()
+            support_fold = np.random.choice(a=np.arange(0, len(self.data_train)), size=1)[0]
+            data_support = self.data_train[support_fold]
+            x, y = data_support.get_batch()
+            support_loss = F.mse_loss(self.net(x), y)
+            x_query, y_query = [], []
+            for query_fold in range(len(self.data_train)):
+                if query_fold != support_fold:
+                    x, y = self.data_train[query_fold].get_batch()
+                    x_query.append(x)
+                    y_query.append(y)
+            x_query, y_query = torch.cat(x_query), torch.cat(y_query)
             y_hat = self.net(
-                x=x,
-                meta_loss=meta_train_loss,
-                meta_step_size=self.config['meta_lr'],
+                x=x_query,
+                meta_loss=support_loss,
+                meta_step_size=self.config['inner_lr'],
                 stop_gradient=self.config['stop_gradient'])
-            meta_loss = F.mse_loss(y_hat, y)
-            total_loss = meta_train_loss + meta_loss * self.config['meta_loss_mult']
+            query_loss = F.mse_loss(y_hat, y_query)
+            loss = support_loss + self.config['query_loss_mult'] * query_loss
             self.optimizer.zero_grad()
-            total_loss.backward()
+            loss.backward()
             self.optimizer.step()
             if itr > 0 and itr % self.config['num_val_itrs'] == 0:
                 is_early_stop = self.val()
