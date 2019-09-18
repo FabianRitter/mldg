@@ -13,6 +13,7 @@ def main(config):
         config['dropout'],
         config['seed'])
     os.makedirs(dpath)
+    config['dpath'] = dpath
     val_folds, test_folds = get_folds(config['num_folds'])
     val_loss, test_loss = [], []
     for val_fold, test_fold in zip(val_folds, test_folds):
@@ -22,7 +23,7 @@ def main(config):
         val_loss.append(trainer.train())
         test_loss.append(trainer.test())
     results = f'{np.mean(val_loss):.6f},{np.mean(test_loss):.6f}'
-    write(os.path.join(dpath, 'results.txt'), results)
+    write(os.path.join(dpath, 'results.csv'), results)
     print(results)
 
 if __name__ == '__main__':

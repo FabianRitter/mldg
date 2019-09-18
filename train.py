@@ -1,9 +1,7 @@
 import mlp
 import torch.nn.functional as F
 
-from copy import deepcopy
 from data_reader import BatchGenerator
-from radam import RAdam
 from sklearn.metrics import r2_score
 from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR
@@ -13,11 +11,11 @@ class MLPTrainer:
     def __init__(self, config):
         self.config = config
         self.set_data()
+        self.log_fpath = os.path.join(self.config['dpath'], 'log_{}.csv'.format(self.config['val_fold']))
         self.net = mlp.MLP(config).cuda()
         self.optimizer = Adam(self.net.parameters(), lr=config['lr'], weight_decay=config['wd'])
         self.scheduler = CosineAnnealingLR(self.optimizer, config['num_itrs'])
-        self.best_val_score = -np.inf
-        self.best_val_itr = None
+        self.scores = []
 
     def set_data(self):
         data_dpath = os.path.join(os.environ['DATA_PATH'], 'xtx')
@@ -55,24 +53,15 @@ class MLPTrainer:
             self.optimizer.step()
             self.scheduler.step(itr)
             if itr > 0 and itr % self.config['num_val_itrs'] == 0:
-                is_early_stop = self.val()
-                if is_early_stop:
-                    break
-        return self.best_val_score
+                self.val()
+        return self.scores[-1][1]
 
     def val(self):
         score = self.eval(self.data_val)
-        if score > self.best_val_score:
-            self.best_val_score = score
-            self.best_val_itr = self.itr
-            self.best_val_params = deepcopy(self.net.state_dict())
-            return False
-        else:
-            if self.itr - self.best_val_itr >= self.config['num_early_stop_itrs']:
-                return True
+        self.scores.append([self.itr, score])
+        self.log()
 
     def test(self):
-        self.net.load_state_dict(self.best_val_params)
         return self.eval(self.data_test)
 
     def eval(self, data):
@@ -88,6 +77,9 @@ class MLPTrainer:
             count += len(x_batch)
         y_hat, y = np.concatenate(y_hat), np.concatenate(y)
         return r2_score(y, y_hat)
+
+    def log(self):
+        pd.DataFrame(np.stack(self.scores)).to_csv(self.log_fpath, header=False, index=False)
 
 class MLDGTrainer(MLPTrainer):
     def __init__(self, config):
@@ -114,7 +106,5 @@ class MLDGTrainer(MLPTrainer):
             self.optimizer.step()
             self.scheduler.step(itr)
             if itr > 0 and itr % self.config['num_val_itrs'] == 0:
-                is_early_stop = self.val()
-                if is_early_stop:
-                    break
-        return self.best_val_score
+                self.val()
+        return self.scores[-1][1]
