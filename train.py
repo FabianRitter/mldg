@@ -14,7 +14,7 @@ class MLPTrainer:
         self.config = config
         self.set_data()
         self.net = mlp.MLP(config).cuda()
-        self.optimizer = RAdam(self.net.parameters(), lr=config['lr'], weight_decay=config['wd'])
+        self.optimizer = Adam(self.net.parameters(), lr=config['lr'], weight_decay=config['wd'])
         self.scheduler = CosineAnnealingLR(self.optimizer, config['num_itrs'])
         self.best_val_score = -np.inf
         self.best_val_itr = None
