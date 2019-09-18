@@ -6,10 +6,10 @@ from utils import *
 def main(config):
     set_seed(config['seed'])
     dpath = 'results/mldg_{}_{}_{}_{}_{}_{}/{}'.format(
+        config['batch_size'],
         config['lr'],
         config['inner_lr'],
         config['query_loss_mult'],
-        config['batch_size'],
         config['wd'],
         config['dropout'],
         config['seed'])
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=100)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--inner_lr', type=float, default=1e-4)
-    parser.add_argument('--query_loss_mult', type=float, default=0)
+    parser.add_argument('--query_loss_mult', type=float, default=1)
     parser.add_argument('--wd', type=float, default=0.01)
     parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--stop_gradient', type=bool, default=False)

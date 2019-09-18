@@ -3,8 +3,10 @@ import torch.nn.functional as F
 
 from copy import deepcopy
 from data_reader import BatchGenerator
+from radam import RAdam
 from sklearn.metrics import r2_score
 from torch.optim import Adam
+from torch.optim.lr_scheduler import CosineAnnealingLR
 from utils import *
 
 class MLPTrainer:
@@ -12,7 +14,8 @@ class MLPTrainer:
         self.config = config
         self.set_data()
         self.net = mlp.MLP(config).cuda()
-        self.optimizer = Adam(self.net.parameters(), lr=config['lr'], weight_decay=config['wd'])
+        self.optimizer = RAdam(self.net.parameters(), lr=config['lr'], weight_decay=config['wd'])
+        self.scheduler = CosineAnnealingLR(self.optimizer, config['num_itrs'])
         self.best_val_score = -np.inf
         self.best_val_itr = None
 
@@ -50,6 +53,7 @@ class MLPTrainer:
             self.optimizer.zero_grad()
             loss.mean().backward()
             self.optimizer.step()
+            self.scheduler.step(itr)
             if itr > 0 and itr % self.config['num_val_itrs'] == 0:
                 is_early_stop = self.val()
                 if is_early_stop:
@@ -108,6 +112,7 @@ class MLDGTrainer(MLPTrainer):
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            self.scheduler.step(itr)
             if itr > 0 and itr % self.config['num_val_itrs'] == 0:
                 is_early_stop = self.val()
                 if is_early_stop:

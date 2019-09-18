@@ -6,8 +6,8 @@ from utils import *
 def main(config):
     set_seed(config['seed'])
     dpath = 'results/mlp_{}_{}_{}_{}/{}'.format(
-        config['lr'],
         config['batch_size'],
+        config['lr'],
         config['wd'],
         config['dropout'],
         config['seed'])
