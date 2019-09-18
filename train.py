@@ -42,7 +42,7 @@ class MLPTrainer:
 
     def train(self):
         self.net.train()
-        for itr in range(self.config['num_itrs']):
+        for itr in range(1, self.config['num_itrs'] + 1):
             self.itr = itr
             loss = 0
             for fold in self.data_train:
